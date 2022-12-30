@@ -103,11 +103,12 @@ def get_test_cases(valid_versions: dict[str, list[str]], max_cases: int | None =
     total_cases = len(cases) + 1
     if max_cases and total_cases > max_cases:
         print(f'{total_cases} cases generated, truncating to {max_cases}')
-        cases = [min_versions_case] + random.sample(cases, k=max_cases - 1)
+        trunc_cases = set(random.sample(cases, k=max_cases - 1))
+        cases = [min_versions_case] + [case for case in cases if case in trunc_cases]
     else:
         print(f'{total_cases} cases generated')
         cases = [min_versions_case] + cases
-    return [' '.join(case) for case in cases]
+    return [' '.join(case).replace('  ', ' ') for case in cases]
 
 
 def as_req(name: str, version: str) -> str:
