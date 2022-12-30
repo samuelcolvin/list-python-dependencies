@@ -5,4 +5,4 @@ dependencies = [
     "django>=4",
     "pytest>=7",
 ]
-optional-dependencies = { http = ['requests>=2.20', 'httpx>=0.20.0'] }
+optional-dependencies = { http = ['requests>=2.20', 'black>=0.20.0'] }
