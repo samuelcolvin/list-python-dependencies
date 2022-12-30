@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling", "hatch-fancy-pypi-readme>=22.5.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "list_dependencies.py"
+
+[project]
+name = "list_dependencies"
+description = "List all valid dependency versions for a Python project"
+authors = [
+    {name = "Samuel Colvin", email = "s@muelcolvin.com"},
+]
+license = "MIT"
+requires-python = "~=3.11"
+dependencies = [
+    "requests==2.28.1",
+    "packaging==22.0",
+]
+dynamic = ["version", "readme"]
+
+[project.scripts]
+list_dependencies = "list_dependencies:list_dependencies"
+
+[tool.ruff]
+line-length = 120
+extend-select = ["Q"]
+flake8-quotes = {inline-quotes = "single", multiline-quotes = "double"}
+
+[tool.black]
+color = true
+line-length = 120
+target-version = ["py311"]
+skip-string-normalization = true
+
+[tool.isort]
+line_length = 120
+known_first_party = "pydantic"
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+combine_as_imports = true

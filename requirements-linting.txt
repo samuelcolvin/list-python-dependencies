@@ -1,0 +1,5 @@
+black
+isort
+pyupgrade
+pre-commit
+ruff

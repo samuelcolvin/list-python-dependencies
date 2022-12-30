@@ -1,0 +1,10 @@
+.idea/
+env/
+venv/
+.venv/
+env3*/
+*.lock
+*.py[cod]
+*.egg-info/
+/sandbox/
+/.ruff_cache/

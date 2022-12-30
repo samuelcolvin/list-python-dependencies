@@ -1,0 +1,19 @@
+name: List Python Dependencies
+author: Samuel Colvin <s@muelcolvin.com>
+description: List all valid python dependencies for a project
+
+inputs:
+  max_cases:
+    description: Maximum number of combined dependencies to list, defaults to no limit
+
+  path:
+    description: Path to the project, defaults to the current directory
+    default: .
+
+runs:
+  using: docker
+  image: Dockerfile
+
+branding:
+  icon: arrow-right-circle
+  color: orange
