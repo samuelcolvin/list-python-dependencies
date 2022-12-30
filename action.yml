@@ -10,6 +10,12 @@ inputs:
     description: Path to the project, defaults to the current directory
     default: .
 
+  mode:
+    description: |
+      Can be with "first-last" - only create cases for the earlier earliest and latest versions of each dependency,
+      or "all" - create cases for all versions of each dependency.
+    default: all
+
 runs:
   using: docker
   image: Dockerfile

@@ -41,6 +41,12 @@ jobs:
         max_cases: 10
         path: ./test-case/
 
+    # also try in "first-last" mode, note we don't actually use this for the matrix step below
+    - uses: samuelcolvin/list-python-dependencies@main
+      with:
+        mode: first-last
+        path: ./test-case/
+
   test_matrix:
     runs-on: ubuntu-latest
 

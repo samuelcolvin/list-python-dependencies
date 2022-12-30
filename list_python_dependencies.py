@@ -13,18 +13,21 @@ __all__ = ('list_python_dependencies',)
 
 
 def list_python_dependencies():
+    path = Path(os.getenv('INPUT_PATH') or '.').expanduser().resolve()
+
     max_cases_v = os.environ.get('INPUT_MAX_CASES')
     if max_cases_v:
         max_cases = int(max_cases_v)
     else:
         max_cases = None
 
-    path = Path(os.getenv('INPUT_PATH') or '.').expanduser().resolve()
-    print(f'list-dependencies __version__={__version__!r} path={path!r} max_cases={max_cases}')
+    first_last = os.getenv('INPUT_MODE', '').strip().lower() == 'first-last'
+
+    print(f'list-dependencies __version__={__version__!r} path={path!r} max_cases={max_cases} first_last={first_last}')
     deps = load_deps(path)
     valid_versions = get_valid_versions(deps)
     print('')
-    cases = get_test_cases(valid_versions, max_cases=max_cases)
+    cases = get_test_cases(valid_versions, max_cases=max_cases, first_last=first_last)
     for case in cases:
         print(f'  {case}')
     print('')
@@ -74,6 +77,9 @@ def load_deps(path: Path) -> list[Requirement]:
     raise RuntimeError(f'No {py_pyroject.name} or {setup_py.name} found in {path}')
 
 
+OMIT_SENTINEL = '[omit]'
+
+
 def get_valid_versions(deps: list[Requirement]) -> dict[str, list[str]]:
     session = requests.Session()
     valid_versions: dict[str, list[str]] = {}
@@ -85,17 +91,28 @@ def get_valid_versions(deps: list[Requirement]) -> dict[str, list[str]]:
         if not compat_versions:
             raise RuntimeError(f'No compatible versions found for {dep.name}')
         if isinstance(dep, OptionalRequirement):
-            compat_versions.append('[omit]')
+            compat_versions.append(OMIT_SENTINEL)
         valid_versions[dep.name] = compat_versions
     return valid_versions
 
 
-def get_test_cases(valid_versions: dict[str, list[str]], max_cases: int | None = None) -> list[str]:
+def get_test_cases(valid_versions: dict[str, list[str]], max_cases: int | None, first_last: bool) -> list[str]:
     min_versions = [(name, versions[0]) for name, versions in valid_versions.items()]
     cases: list[tuple[tuple[str, str], ...]] = []
 
     for name, versions in valid_versions.items():
-        for v in versions[1:]:
+        add_versions = []
+        if first_last:
+            # if first_last is True, we only add the last version, unless it's an "[omit]" sentinel,
+            # in which case we also add teh last but one value which should be the last version
+            if len(versions) > 1:
+                add_versions = [versions[-1]]
+                if len(versions) > 2 and add_versions[0] == OMIT_SENTINEL:
+                    add_versions.insert(0, versions[-2])
+        else:
+            add_versions = versions[1:]
+
+        for v in add_versions:
             case = [as_req(n, v if n == name else min_v) for n, min_v in min_versions]
             cases.append(tuple(case))
 
@@ -112,7 +129,7 @@ def get_test_cases(valid_versions: dict[str, list[str]], max_cases: int | None =
 
 
 def as_req(name: str, version: str) -> str:
-    if version == '[omit]':
+    if version == OMIT_SENTINEL:
         return ''
     else:
         return f'{name}=={version}'
