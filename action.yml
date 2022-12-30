@@ -1,6 +1,6 @@
 name: List Python Dependencies
 author: Samuel Colvin <s@muelcolvin.com>
-description: List all valid python dependencies for a project
+description: List all valid versions of dependency for a Python project
 
 inputs:
   max_cases:

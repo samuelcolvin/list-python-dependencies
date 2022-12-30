@@ -8,10 +8,10 @@ import requests
 from packaging.requirements import Requirement
 
 __version__ = '0.0.1'
-__all__ = ('list_dependencies',)
+__all__ = ('list_python_dependencies',)
 
 
-def list_dependencies():
+def list_python_dependencies():
     max_cases = int(os.getenv('INPUT_MAX_CASES', 0)) or None
     path = Path(os.getenv('INPUT_PATH', '.')).expanduser().resolve()
     print(f'list-dependencies __version__={__version__!r} path={path!r} max_cases={max_cases}')

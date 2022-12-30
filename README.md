@@ -1,6 +1,6 @@
 # List Python Dependencies
 
-GitHub action to list valid versions of Python dependencies.
+GitHub action to list all valid versions of dependency for a Python project
 
 WIP
 

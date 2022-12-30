@@ -3,11 +3,11 @@ requires = ["hatchling", "hatch-fancy-pypi-readme>=22.5.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
-path = "list_dependencies.py"
+path = "list_python_dependencies.py"
 
 [project]
-name = "list_dependencies"
-description = "List all valid dependency versions for a Python project"
+name = "list_python_dependencies"
+description = "List all valid versions of dependency for a Python project"
 authors = [
     {name = "Samuel Colvin", email = "s@muelcolvin.com"},
 ]
@@ -20,7 +20,7 @@ dependencies = [
 dynamic = ["version", "readme"]
 
 [project.scripts]
-list_dependencies = "list_dependencies:list_dependencies"
+list_python_dependencies = "list_python_dependencies:list_python_dependencies"
 
 [tool.ruff]
 line-length = 120
