@@ -25,21 +25,24 @@ def list_python_dependencies():
     valid_versions = get_valid_versions(deps)
     print('')
     cases = get_test_cases(valid_versions, max_cases=max_cases)
-    case_strings = [' '.join(f'{name}=={version}' for name, version in case) for case in cases]
-    for case in case_strings:
+    for case in cases:
         print(f'  {case}')
     print('')
 
     github_output = os.getenv('GITHUB_OUTPUT')
     env_name = 'PYTHON_DEPENDENCY_CASES'
     if github_output:
-        json_value = json.dumps(case_strings)
+        json_value = json.dumps(cases)
         print('Setting output for future use:')
         print(f'  {env_name}={json_value}')
         with open(github_output, 'a') as f:
             f.write(f'{env_name}={json_value}\n')
     else:
         print(f'Warning: GITHUB_OUTPUT not set, cannot set {env_name}')
+
+
+class OptionalRequirement(Requirement):
+    pass
 
 
 def load_deps(path: Path) -> list[Requirement]:
@@ -50,8 +53,8 @@ def load_deps(path: Path) -> list[Requirement]:
         deps = [Requirement(dep) for dep in pyproject['project']['dependencies']]
         option_deps = pyproject['project'].get('optional-dependencies')
         if option_deps:
-            for value in option_deps.values():
-                deps.extend([Requirement(dep) for dep in value])
+            for extra_deps in option_deps.values():
+                deps.extend([OptionalRequirement(dep) for dep in extra_deps])
         return deps
 
     setup_py = path / 'setup.py'
@@ -65,7 +68,7 @@ def load_deps(path: Path) -> list[Requirement]:
         m = re.search(r'extras_require=(\{.+?})', setup, flags=re.S)
         if m:
             for extra_deps in eval(m.group(1)).values():
-                deps.extend(Requirement(dep) for dep in extra_deps)
+                deps.extend(OptionalRequirement(dep) for dep in extra_deps)
         return deps
 
     raise RuntimeError(f'No {py_pyroject.name} or {setup_py.name} found in {path}')
@@ -81,28 +84,37 @@ def get_valid_versions(deps: list[Requirement]) -> dict[str, list[str]]:
         compat_versions = [v for v in versions if v in dep.specifier]
         if not compat_versions:
             raise RuntimeError(f'No compatible versions found for {dep.name}')
+        if isinstance(dep, OptionalRequirement):
+            compat_versions.append('[omit]')
         valid_versions[dep.name] = compat_versions
     return valid_versions
 
 
-def get_test_cases(
-    valid_versions: dict[str, list[str]], max_cases: int | None = None
-) -> list[tuple[tuple[str, str], ...]]:
-    min_versions_case = tuple((name, versions[0]) for name, versions in valid_versions.items())
+def get_test_cases(valid_versions: dict[str, list[str]], max_cases: int | None = None) -> list[str]:
+    min_versions = [(name, versions[0]) for name, versions in valid_versions.items()]
     cases: list[tuple[tuple[str, str], ...]] = []
 
     for name, versions in valid_versions.items():
         for v in versions[1:]:
-            case = [(n, v if n == name else min_v) for n, min_v in min_versions_case]
+            case = [as_req(n, v if n == name else min_v) for n, min_v in min_versions]
             cases.append(tuple(case))
 
+    min_versions_case = tuple(as_req(n, v) for n, v in min_versions)
     if max_cases and len(cases) >= max_cases:
         print(f'{len(cases) + 1} cases generated, truncating to {max_cases}')
         trunc_cases = list(random.sample(cases, k=max_cases - 1))
-        return [min_versions_case] + [case for case in cases if case in trunc_cases]
+        cases = [min_versions_case] + [case for case in cases if case in trunc_cases]
     else:
         print(f'{len(cases) + 1} cases generated')
-        return [min_versions_case] + cases
+        cases = [min_versions_case] + cases
+    return [' '.join(case) for case in cases]
+
+
+def as_req(name: str, version: str) -> str:
+    if version == '[omit]':
+        return ''
+    else:
+        return f'{name}=={version}'
 
 
 if __name__ == '__main__':
