@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := lint
-sources = list_dependencies.py
+sources = list_python_dependencies.py
 
 .PHONY: install
 install:
@@ -20,4 +20,4 @@ lint:
 
 .PHONY: pyupgrade
 pyupgrade:
-	pyupgrade --py37-plus $(sources)
+	pyupgrade --py311-plus $(sources)
