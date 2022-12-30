@@ -23,10 +23,12 @@ def list_python_dependencies():
     print(f'list-dependencies __version__={__version__!r} path={path!r} max_cases={max_cases}')
     deps = load_deps(path)
     valid_versions = get_valid_versions(deps)
-    cases = get_test_cases(valid_versions, max_cases=8)
+    print('')
+    cases = get_test_cases(valid_versions, max_cases=max_cases)
     case_strings = [' '.join(f'{name}=={version}' for name, version in case) for case in cases]
     for case in case_strings:
         print(f'  {case}')
+    print('')
 
     github_output = os.getenv('GITHUB_OUTPUT')
     env_name = 'PYTHON_DEPENDENCY_CASES'
@@ -83,20 +85,25 @@ def get_valid_versions(deps: list[Requirement]) -> dict[str, list[str]]:
     return valid_versions
 
 
-def get_test_cases(valid_versions: dict[str, list[str]], max_cases: int | None = None) -> list[list[tuple[str, str]]]:
-    min_versions_case = [(name, versions[0]) for name, versions in valid_versions.items()]
-    cases = []
+def get_test_cases(
+    valid_versions: dict[str, list[str]], max_cases: int | None = None
+) -> list[tuple[tuple[str, str], ...]]:
+    min_versions_case = tuple((name, versions[0]) for name, versions in valid_versions.items())
+    cases: list[tuple[tuple[str, str], ...]] = []
 
     for name, versions in valid_versions.items():
         for v in versions[1:]:
             case = [(n, v if n == name else min_v) for n, min_v in min_versions_case]
-            cases.append(case)
+            cases.append(tuple(case))
 
     if max_cases and len(cases) >= max_cases:
         print(f'{len(cases) + 1} cases generated, truncating to {max_cases}')
-        random.shuffle(cases)
-        trunc_cases = cases[: max_cases - 1]
-        return [min_versions_case] + sorted(trunc_cases)
+        trunc_cases = list(random.sample(cases, k=max_cases - 1))
+        return [min_versions_case] + [case for case in cases if case in trunc_cases]
     else:
         print(f'{len(cases) + 1} cases generated')
         return [min_versions_case] + cases
+
+
+if __name__ == '__main__':
+    list_python_dependencies()

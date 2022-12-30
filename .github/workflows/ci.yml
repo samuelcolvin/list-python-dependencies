@@ -37,6 +37,9 @@ jobs:
 
     - uses: samuelcolvin/list-python-dependencies@main
       id: list-python-dependencies
+      with:
+        max_cases: 10
+        path: ./test-case/
 
   test_matrix:
     runs-on: ubuntu-latest
@@ -58,5 +61,5 @@ jobs:
           python-version: '3.11'
 
       - run: echo installing ${{ matrix.PYTHON_DEPENDENCY_CASE }}
-      - run: pip install -r ${{ matrix.PYTHON_DEPENDENCY_CASE }}
+      - run: pip install ${{ matrix.PYTHON_DEPENDENCY_CASE }}
       - run: pip freeze

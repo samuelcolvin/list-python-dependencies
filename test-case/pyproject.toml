@@ -1,0 +1,7 @@
+[project]
+name = "example"
+description = "Everyting else is omitted for brevity"
+dependencies = [
+    "django>=3",
+    "pytest>=6",
+]
