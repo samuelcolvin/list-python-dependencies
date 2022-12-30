@@ -32,4 +32,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - uses: samuelcolvin/list-python-dependencies:latest
+    - uses: samuelcolvin/list-python-dependencies@main
