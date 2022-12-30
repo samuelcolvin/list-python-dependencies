@@ -8,7 +8,7 @@ from pathlib import Path
 import requests
 from packaging.requirements import Requirement
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 __all__ = ('list_python_dependencies',)
 
 
@@ -100,12 +100,12 @@ def get_test_cases(valid_versions: dict[str, list[str]], max_cases: int | None =
             cases.append(tuple(case))
 
     min_versions_case = tuple(as_req(n, v) for n, v in min_versions)
-    if max_cases and len(cases) >= max_cases:
-        print(f'{len(cases) + 1} cases generated, truncating to {max_cases}')
-        trunc_cases = list(random.sample(cases, k=max_cases - 1))
-        cases = [min_versions_case] + [case for case in cases if case in trunc_cases]
+    total_cases = len(cases) + 1
+    if max_cases and total_cases > max_cases:
+        print(f'{total_cases} cases generated, truncating to {max_cases}')
+        cases = [min_versions_case] + random.sample(cases, k=max_cases - 1)
     else:
-        print(f'{len(cases) + 1} cases generated')
+        print(f'{total_cases} cases generated')
         cases = [min_versions_case] + cases
     return [' '.join(case) for case in cases]
 
