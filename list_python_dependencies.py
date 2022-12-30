@@ -33,11 +33,11 @@ def list_python_dependencies():
     if github_output:
         json_value = json.dumps(case_strings)
         print('Setting output for future use:')
-        print(f'  "{env_name}"={json_value}')
+        print(f'  {env_name}={json_value}')
         with open(github_output, 'a') as f:
             f.write(f'{env_name}={json_value}\n')
     else:
-        print(f'Warning: GITHUB_OUTPUT not set, cannot set "{env_name}"')
+        print(f'Warning: GITHUB_OUTPUT not set, cannot set {env_name}')
 
 
 def load_deps(path: Path) -> list[Requirement]:

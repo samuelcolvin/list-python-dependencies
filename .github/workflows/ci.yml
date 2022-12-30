@@ -26,10 +26,32 @@ jobs:
       with:
         extra_args: --all-files
 
-  test:
+  test-action:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
 
     - uses: samuelcolvin/list-python-dependencies@main
+
+  test-matrix:
+    runs-on: ubuntu-latest
+
+    needs: ['test-action']
+
+    strategy:
+      matrix:
+        PYTHON_DEPENDENCY_CASE: ${{ fromJSON(needs.say_hello.outputs.PYTHON_DEPENDENCY_CASES) }}
+
+    name: testing ${{ matrix.PYTHON_DEPENDENCY_CASE }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - run: echo installing ${{ matrix.PYTHON_DEPENDENCY_CASE }}
+      - run: pip install -r ${{ matrix.PYTHON_DEPENDENCY_CASE }}
+      - run: pip freeze
