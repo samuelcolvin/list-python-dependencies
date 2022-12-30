@@ -12,8 +12,13 @@ __all__ = ('list_python_dependencies',)
 
 
 def list_python_dependencies():
-    max_cases = int(os.getenv('INPUT_MAX_CASES', 0)) or None
-    path = Path(os.getenv('INPUT_PATH', '.')).expanduser().resolve()
+    max_cases_v = os.environ.get('INPUT_MAX_CASES')
+    if max_cases_v:
+        max_cases = int(max_cases_v)
+    else:
+        max_cases = None
+
+    path = Path(os.getenv('INPUT_PATH') or '.').expanduser().resolve()
     print(f'list-dependencies __version__={__version__!r} path={path!r} max_cases={max_cases}')
     deps = load_deps(path)
     valid_versions = get_valid_versions(deps)
