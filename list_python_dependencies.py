@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import re
@@ -23,8 +24,20 @@ def list_python_dependencies():
     deps = load_deps(path)
     valid_versions = get_valid_versions(deps)
     cases = get_test_cases(valid_versions, max_cases=8)
-    for case in cases:
-        print(' '.join(f'{name}=={version}' for name, version in case))
+    case_strings = [' '.join(f'{name}=={version}' for name, version in case) for case in cases]
+    for case in case_strings:
+        print(f'  {case}')
+
+    github_output = os.getenv('GITHUB_OUTPUT')
+    env_name = 'PYTHON_DEPENDENCY_CASES'
+    if github_output:
+        json_value = json.dumps(case_strings)
+        print('Setting output for future use:')
+        print(f'  "{env_name}"={json_value}')
+        with open(github_output, 'a') as f:
+            f.write(f'{env_name}={json_value}\n')
+    else:
+        print(f'Warning: GITHUB_OUTPUT not set, cannot set "{env_name}"')
 
 
 def load_deps(path: Path) -> list[Requirement]:
