@@ -60,6 +60,5 @@ jobs:
         with:
           python-version: '3.11'
 
-      - run: echo installing ${{ matrix.PYTHON_DEPENDENCY_CASE }}
       - run: pip install ${{ matrix.PYTHON_DEPENDENCY_CASE }}
       - run: pip freeze
